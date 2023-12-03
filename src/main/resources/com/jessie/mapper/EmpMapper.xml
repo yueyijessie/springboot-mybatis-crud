@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace是EmpMapper接口的相对路径-->
+<mapper namespace="com.jessie.mapper.EmpMapper">
+
+<!--    定义可复用的sql片段-->
+    <sql id="commonSelect">
+        select id, username, password, name, gender, image, job, entrydate, dept_id, create_time, update_time
+        from emp
+    </sql>
+
+
+<!--    批量删除 (18,19,20)-->
+<!--    collection:遍历的集合-->
+<!--    item：遍历出来的元素-->
+<!--    separator：分隔符-->
+<!--    open：遍历开始前拼接的sql片段-->
+<!--    close：遍历结束后拼接的sql片段-->
+    <delete id="deleteByIds">
+        delete from emp where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--    resultType:单条记录所封装的类型，在这里就是emp，取emp的相对路径-->
+    <!--    where标签:根据条件判断是否生成关键字where，以及处理掉多余的and-->
+    <!--    include，通过redid指定需要复用的片段-->
+    <select id="getByCondition" resultType="com.jessie.pojo.Emp">
+        <include refid="commonSelect" />
+        <where>
+            <if test="name != null">
+                name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and gender = #{gender}
+            </if>
+            <if test="startDate != null and endDate != null">
+                and entrydate between #{startDate} and #{endDate}
+            </if>
+        </where>
+        order by update_time desc
+    </select>
+    <update id="update">
+        update emp
+        <set>
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="image != null">
+                image = #{image},
+            </if>
+            <if test="job != null">
+                job = #{job},
+            </if>
+            <if test="entrydate != null">
+                entrydate = #{entrydate},
+            </if>
+            <if test="deptId != null">
+                dept_id = #{deptId},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>
